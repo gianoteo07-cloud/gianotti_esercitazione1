@@ -122,10 +122,75 @@
                   {{ camera.ospite_nome }} {{ camera.ospite_cognome }}
                 </p>
               </div>
+
+              <!-- Pulsanti Azioni -->
+              <div class="room-actions">
+                <button 
+                  *ngIf="!camera.occupata"
+                  class="btn btn-action btn-checkin"
+                  (click)="apriModalCheckIn(camera)"
+                  [disabled]="caricamento"
+                >
+                  Check-in
+                </button>
+                <button 
+                  *ngIf="camera.occupata"
+                  class="btn btn-action btn-checkout"
+                  (click)="effettuaCheckOut(camera)"
+                  [disabled]="caricamento"
+                >
+                  Check-out
+                </button>
+              </div>
             </div>
           </div>
         </div>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Check-in -->
+<div class="modal-overlay" *ngIf="mostraModalCheckIn" (click)="chiudiModalCheckIn()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Check-in Camera {{ cameraSelezionataCheckIn?.numero }}</h2>
+      <button class="modal-close" (click)="chiudiModalCheckIn()">×</button>
+    </div>
+
+    <div class="modal-body">
+      <div class="mb-3">
+        <label for="ospite-nome" class="form-label">Nome Ospite</label>
+        <input 
+          type="text"
+          class="form-control"
+          id="ospite-nome"
+          [(ngModel)]="nuovoOspite.nome"
+          placeholder="Es: Mario"
+          [disabled]="caricamento"
+        >
+      </div>
+
+      <div class="mb-3">
+        <label for="ospite-cognome" class="form-label">Cognome Ospite</label>
+        <input 
+          type="text"
+          class="form-control"
+          id="ospite-cognome"
+          [(ngModel)]="nuovoOspite.cognome"
+          placeholder="Es: Rossi"
+          [disabled]="caricamento"
+        >
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-secondary" (click)="chiudiModalCheckIn()" [disabled]="caricamento">
+        Annulla
+      </button>
+      <button class="btn btn-primary" (click)="effettuaCheckIn()" [disabled]="caricamento">
+        {{ caricamento ? 'Elaborando...' : 'Conferma Check-in' }}
+      </button>
     </div>
   </div>
 </div>

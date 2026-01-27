@@ -16,7 +16,7 @@ export interface Camera {
   providedIn: 'root'
 })
 export class RoomService {
-  private apiUrl = 'http://localhost:5000/rooms';
+  private apiUrl = 'https://curly-garbanzo-x57wgrr6w747c6456-33931.app.github.dev/rooms';
 
   constructor(private http: HttpClient) { }
 
@@ -28,5 +28,18 @@ export class RoomService {
   // POST nuova camera
   aggiungiCamera(camera: Camera): Observable<any> {
     return this.http.post<any>(this.apiUrl, camera);
+  }
+
+  // PUT check-in ospite
+  checkIn(cameraId: number, ospiteNome: string, ospiteCognome: string): Observable<any> {
+    return this.http.put<any>(
+      `${this.apiUrl}/${cameraId}/checkin`,
+      { ospite_nome: ospiteNome, ospite_cognome: ospiteCognome }
+    );
+  }
+
+  // PUT check-out ospite
+  checkOut(cameraId: number): Observable<any> {
+    return this.http.put<any>(`${this.apiUrl}/${cameraId}/checkout`, {});
   }
 }
