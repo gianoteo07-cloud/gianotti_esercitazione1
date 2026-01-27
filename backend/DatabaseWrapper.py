@@ -63,3 +63,17 @@ class DatabaseWrapper:
             (numero, tipologia, prezzo)
             #%s fa da placeholder: "le variabili che passo come parametri prendono i valori di %s"
         )
+
+    # Check-in ospite
+    def check_in(self, camera_id, ospite_nome, ospite_cognome):
+        self.execute_query(
+            "UPDATE Camere SET occupata = TRUE, ospite_nome = %s, ospite_cognome = %s WHERE id = %s",
+            (ospite_nome, ospite_cognome, camera_id)
+        )
+
+    # Check-out ospite
+    def check_out(self, camera_id):
+        self.execute_query(
+            "UPDATE Camere SET occupata = FALSE, ospite_nome = NULL, ospite_cognome = NULL WHERE id = %s",
+            (camera_id,)
+        )

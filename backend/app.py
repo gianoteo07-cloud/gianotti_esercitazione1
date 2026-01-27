@@ -82,6 +82,51 @@ def add_room():
         return jsonify({"error": str(e)}), 500
 
 
+# PUT /rooms/<id>/checkin: registra il check-in di un ospite
+@app.route("/rooms/<int:room_id>/checkin", methods=["PUT"])
+def check_in(room_id):
+    try:
+        if db is None:
+            return jsonify({"error": "Database non disponibile"}), 503
+        
+        data = request.get_json()
+        
+        if not data:
+            return jsonify({"error": "Nessun dato fornito"}), 400
+        
+        # Verifica i campi obbligatori
+        if 'ospite_nome' not in data or 'ospite_cognome' not in data:
+            return jsonify({"error": "Nome e cognome ospite sono obbligatori"}), 400
+        
+        ospite_nome = data['ospite_nome'].strip()
+        ospite_cognome = data['ospite_cognome'].strip()
+        
+        if not ospite_nome or not ospite_cognome:
+            return jsonify({"error": "Nome e cognome ospite non possono essere vuoti"}), 400
+        
+        db.check_in(room_id, ospite_nome, ospite_cognome)
+        
+        return jsonify({"message": "Check-in effettuato con successo"}), 200
+    
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+# PUT /rooms/<id>/checkout: registra il check-out di un ospite
+@app.route("/rooms/<int:room_id>/checkout", methods=["PUT"])
+def check_out(room_id):
+    try:
+        if db is None:
+            return jsonify({"error": "Database non disponibile"}), 503
+        
+        db.check_out(room_id)
+        
+        return jsonify({"message": "Check-out effettuato con successo"}), 200
+    
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
 if __name__ == "__main__":
 #avviamo il server
 #debug=True permette il riavvio automatico del server
