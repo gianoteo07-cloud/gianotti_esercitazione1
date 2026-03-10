@@ -16,9 +16,19 @@ export interface Camera {
   providedIn: 'root'
 })
 export class RoomService {
-  private apiUrl = 'https://curly-garbanzo-x57wgrr6w747c6456-33931.app.github.dev/rooms';
+  private apiUrl = this.resolveApiUrl();
 
   constructor(private http: HttpClient) { }
+
+  private resolveApiUrl(): string {
+    const configuredUrl = (globalThis as { __API_URL__?: string }).__API_URL__;
+
+    if (configuredUrl && configuredUrl.trim().length > 0) {
+      return `${configuredUrl.replace(/\/$/, '')}/rooms`;
+    }
+
+    return 'http://localhost:5000/rooms';
+  }
 
   // GET tutte le camere
   getCamere(): Observable<Camera[]> {
