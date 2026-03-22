@@ -1,0 +1,14 @@
+<section class="denied-shell">
+  <div class="noise"></div>
+  <article class="denied-card">
+    <p class="badge">Oops!</p>
+    <h1>Accesso negato 🚫</h1>
+    <p>
+      Hai bussato alla porta sbagliata del registro elettronico. Ti riportiamo su un percorso più adatto al tuo ruolo.
+    </p>
+    <div class="cta-row">
+      <a routerLink="/" class="ghost">Torna alla home</a>
+      <a [routerLink]="authService.getHomeRoute()" class="primary">Vai alla tua dashboard</a>
+    </div>
+  </article>
+</section>

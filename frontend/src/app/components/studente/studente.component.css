@@ -1,0 +1,13 @@
+.student-shell { padding: 2rem; color: #e2e8f0; }
+.student-header { display:flex; justify-content:space-between; gap:1rem; align-items:center; }
+.badge { display:inline-flex; padding:.35rem .8rem; border-radius:999px; background: rgba(52,211,153,.15); color:#6ee7b7; text-transform:uppercase; letter-spacing:.15em; font-size:.8rem; }
+.stats-card, .grades-card { margin-top: 1.5rem; background: rgba(15, 23, 42, 0.82); border-radius: 28px; padding: 1.5rem; border: 1px solid rgba(148,163,184,.18); }
+.stats-card { display:grid; grid-template-columns: repeat(2,1fr); gap: 1rem; }
+.stats-card span { display:block; color:#94a3b8; }
+.stats-card strong { font-size: 2rem; }
+.grade-list { display:grid; gap: 1rem; }
+.grade-item { display:flex; justify-content:space-between; align-items:center; padding:1rem 1.2rem; border-radius: 20px; background: rgba(30,41,59,.85); }
+.vote { min-width: 4rem; text-align:center; padding:.75rem; border-radius: 16px; background: linear-gradient(135deg, #22c55e, #06b6d4); color:white; font-weight:800; font-size: 1.2rem; }
+.ghost { border: 0; border-radius: 999px; padding: .85rem 1.2rem; cursor: pointer; font-weight: 700; background: rgba(148,163,184,.15); color: white; }
+.error { color: #fca5a5; }
+@media (max-width: 720px) { .student-header, .grade-item { flex-direction: column; align-items: flex-start; } .stats-card { grid-template-columns: 1fr; } }
