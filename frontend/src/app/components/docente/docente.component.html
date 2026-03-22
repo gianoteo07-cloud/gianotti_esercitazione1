@@ -1,0 +1,66 @@
+<section class="page-shell">
+  <header class="page-header">
+    <div>
+      <p class="badge">Ruolo docente</p>
+      <h1>Registro voti della classe</h1>
+      <p class="subtitle">Inserisci nuovi voti e consulta l'elenco completo degli studenti.</p>
+    </div>
+    <button type="button" class="ghost" (click)="authService.logout()">Esci</button>
+  </header>
+
+  <div class="layout-grid">
+    <article class="panel form-panel">
+      <h2>Nuovo voto</h2>
+      <form (ngSubmit)="submit()" #gradeForm="ngForm">
+        <label>
+          Username studente
+          <input name="studenteUsername" [(ngModel)]="form.studenteUsername" required />
+        </label>
+        <label>
+          Nome studente
+          <input name="studenteNome" [(ngModel)]="form.studenteNome" required />
+        </label>
+        <label>
+          Materia
+          <input name="materia" [(ngModel)]="form.materia" required />
+        </label>
+        <label>
+          Voto
+          <input type="number" name="voto" [(ngModel)]="form.voto" min="1" max="10" step="0.25" required />
+        </label>
+        <button class="primary" type="submit" [disabled]="loading || !gradeForm.valid">Salva voto</button>
+      </form>
+      <p class="success" *ngIf="message">{{ message }}</p>
+      <p class="error" *ngIf="error">{{ error }}</p>
+    </article>
+
+    <article class="panel table-panel">
+      <div class="table-header">
+        <h2>Voti registrati</h2>
+        <button class="ghost" type="button" (click)="loadGrades()">Aggiorna</button>
+      </div>
+      <p *ngIf="loading">Caricamento in corso...</p>
+      <div class="table-wrapper" *ngIf="!loading">
+        <table *ngIf="grades.length; else noGrades">
+          <thead>
+            <tr>
+              <th>Studente</th>
+              <th>Username</th>
+              <th>Materia</th>
+              <th>Voto</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let grade of grades">
+              <td>{{ grade.studente_nome }}</td>
+              <td>{{ grade.studente_username }}</td>
+              <td>{{ grade.materia }}</td>
+              <td><strong>{{ grade.voto }}</strong></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <ng-template #noGrades><p>Nessun voto inserito al momento.</p></ng-template>
+    </article>
+  </div>
+</section>

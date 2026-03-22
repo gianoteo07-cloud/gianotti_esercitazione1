@@ -2,3 +2,6 @@ Flask
 pymysql
 flask-cors
 python-dotenv
+PyJWT
+requests
+cryptography

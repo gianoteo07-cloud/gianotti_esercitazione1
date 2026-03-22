@@ -1,0 +1,38 @@
+<section class="student-shell">
+  <header class="student-header">
+    <div>
+      <p class="badge">Ruolo studente</p>
+      <h1>Benvenuto, {{ authService.state().fullName || authService.state().username }}</h1>
+      <p>Qui puoi visualizzare esclusivamente i tuoi voti.</p>
+    </div>
+    <button type="button" class="ghost" (click)="authService.logout()">Esci</button>
+  </header>
+
+  <div class="stats-card">
+    <div>
+      <span>Media attuale</span>
+      <strong>{{ average() }}</strong>
+    </div>
+    <div>
+      <span>Materie valutate</span>
+      <strong>{{ grades.length }}</strong>
+    </div>
+  </div>
+
+  <article class="grades-card">
+    <p *ngIf="loading">Caricamento in corso...</p>
+    <p class="error" *ngIf="error">{{ error }}</p>
+    <div class="grade-list" *ngIf="!loading && grades.length; else emptyState">
+      <section class="grade-item" *ngFor="let grade of grades">
+        <div>
+          <h2>{{ grade.materia }}</h2>
+          <p>{{ grade.studente_nome }}</p>
+        </div>
+        <span class="vote">{{ grade.voto }}</span>
+      </section>
+    </div>
+    <ng-template #emptyState>
+      <p *ngIf="!loading">Non risultano ancora voti registrati per il tuo account.</p>
+    </ng-template>
+  </article>
+</section>
