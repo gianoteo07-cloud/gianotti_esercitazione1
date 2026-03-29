@@ -21,8 +21,10 @@ ROLE_STUDENTE = 'studente'
 KEYCLOAK_URL = os.getenv('KEYCLOAK_URL', 'http://localhost:8080')
 KEYCLOAK_REALM = os.getenv('KEYCLOAK_REALM', 'registro-elettronico')
 KEYCLOAK_AUDIENCE = os.getenv('KEYCLOAK_AUDIENCE', 'registro-frontend')
-JWKS_URL = f"{KEYCLOAK_URL.rstrip('/')}/realms/{KEYCLOAK_REALM}/protocol/openid-connect/certs"
-ISSUER = f"{KEYCLOAK_URL.rstrip('/')}/realms/{KEYCLOAK_REALM}"
+DEFAULT_JWKS_URL = f"{KEYCLOAK_URL.rstrip('/')}/realms/{KEYCLOAK_REALM}/protocol/openid-connect/certs"
+DEFAULT_ISSUER = f"{KEYCLOAK_URL.rstrip('/')}/realms/{KEYCLOAK_REALM}"
+JWKS_URL = os.getenv('KEYCLOAK_JWKS_URL', DEFAULT_JWKS_URL)
+ISSUER = os.getenv('KEYCLOAK_ISSUER', DEFAULT_ISSUER)
 
 _jwk_client = PyJWKClient(JWKS_URL)
 

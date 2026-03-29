@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, computed, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 
@@ -9,9 +9,9 @@ import { AuthService } from '../../services/auth.service';
     <section class="hero-shell">
       <div class="hero-card">
         <p class="eyebrow">Registro Elettronico</p>
-        <h1>Accesso protetto con Angular, Flask e Keycloak</h1>
+        <h1>{{ title() }}</h1>
         <p>
-          Effettua il login per entrare nel pannello corretto in base al tuo ruolo.
+          Effettua il login per entrare nel pannello {{ subtitle() }}.
         </p>
         <div class="actions">
           <button type="button" class="primary" (click)="login()">Accedi con Keycloak</button>
@@ -32,6 +32,28 @@ import { AuthService } from '../../services/auth.service';
 export class HomeComponent implements OnInit {
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
+
+  readonly title = computed(() => {
+    const portalRole = this.authService.getPortalRole();
+    if (portalRole === 'docente') {
+      return 'Portale Docenti con Angular, Flask, Keycloak e Nginx';
+    }
+    if (portalRole === 'studente') {
+      return 'Portale Studenti con Angular, Flask, Keycloak e Nginx';
+    }
+    return 'Accesso protetto con Angular, Flask, Keycloak e Nginx';
+  });
+
+  readonly subtitle = computed(() => {
+    const portalRole = this.authService.getPortalRole();
+    if (portalRole === 'docente') {
+      return 'docente';
+    }
+    if (portalRole === 'studente') {
+      return 'studente';
+    }
+    return 'corretto in base al tuo ruolo';
+  });
 
   async ngOnInit(): Promise<void> {
     await this.authService.init();
