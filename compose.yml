@@ -1,5 +1,20 @@
 version: '3.8'
+
 services:
+  mysql:
+    image: mysql:8.4
+    container_name: registro-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: registro_db
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-proot"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
   keycloak:
     image: quay.io/keycloak/keycloak:latest
     container_name: keycloak
@@ -9,7 +24,60 @@ services:
       KC_HTTP_ENABLED: "true"
       KC_HOSTNAME_STRICT: "false"
       KC_PROXY_HEADERS: "xforwarded"
+      KC_HTTP_RELATIVE_PATH: /auth
+    command: ["start-dev"]
+
+  backend:
+    build:
+      context: ./backend
+    container_name: registro-backend
+    environment:
+      PORT: 5000
+      DB_HOST: mysql
+      DB_USER: root
+      DB_PASSWORD: root
+      DB_NAME: registro_db
+      DB_PORT: 3306
+      CORS_ORIGINS: http://localhost
+      KEYCLOAK_URL: http://keycloak:8080/auth
+      KEYCLOAK_JWKS_URL: http://keycloak:8080/auth/realms/registro-elettronico/protocol/openid-connect/certs
+      KEYCLOAK_ISSUER: http://localhost/auth/realms/registro-elettronico
+      KEYCLOAK_REALM: registro-elettronico
+      KEYCLOAK_AUDIENCE: registro-frontend
+    depends_on:
+      mysql:
+        condition: service_healthy
+      keycloak:
+        condition: service_started
+
+  frontend-docente:
+    build:
+      context: ./frontend
+      args:
+        BASE_HREF: /docenti/
+        PORTAL_ROLE: docente
+    container_name: registro-frontend-docente
+
+  frontend-studente:
+    build:
+      context: ./frontend
+      args:
+        BASE_HREF: /studenti/
+        PORTAL_ROLE: studente
+    container_name: registro-frontend-studente
+
+  nginx:
+    image: nginx:1.27-alpine
+    container_name: registro-nginx
+    depends_on:
+      - frontend-docente
+      - frontend-studente
+      - backend
+      - keycloak
     ports:
-      - "8080:8080"
-    command:
-      - start-dev
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+
+volumes:
+  mysql_data:

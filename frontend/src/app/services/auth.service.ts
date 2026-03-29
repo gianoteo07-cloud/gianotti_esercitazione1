@@ -2,6 +2,7 @@ import { DOCUMENT, isPlatformBrowser } from '@angular/common';
 import { Inject, Injectable, PLATFORM_ID, signal } from '@angular/core';
 
 export type UserRole = 'docente' | 'studente';
+export type PortalRole = UserRole | 'all';
 
 export interface AuthState {
   authenticated: boolean;
@@ -49,13 +50,7 @@ export class AuthService {
     const storedToken = this.document.defaultView?.localStorage.getItem('registro_token') ?? '';
     const token = fragmentToken || storedToken;
 
-    console.log('Auth Init - Fragment Token:', !!fragmentToken);
-    console.log('Auth Init - Stored Token:', !!storedToken);
-    console.log('Auth Init - Using Token:', !!token);
-    console.log('Auth Init - URL Hash:', this.document.location.hash.substring(0, 100));
-
     if (!token) {
-      console.log('Auth Init - No token found, setting unauthenticated');
       this.state.set({ authenticated: false, initialized: true, username: '', fullName: '', roles: [] });
       return;
     }
@@ -64,10 +59,7 @@ export class AuthService {
     this.document.defaultView?.localStorage.setItem('registro_token', token);
 
     const payload = this.parseJwt(token);
-    console.log('Auth Init - Parsed Payload:', !!payload, payload?.preferred_username);
-    
     if (!payload) {
-      console.log('Auth Init - Failed to parse token');
       this.clearSession();
       return;
     }
@@ -79,7 +71,6 @@ export class AuthService {
       fullName: payload.name ?? (([payload.given_name, payload.family_name].filter(Boolean).join(' ') || payload.preferred_username) ?? ''),
       roles: payload.realm_access?.roles ?? [],
     });
-    console.log('Auth Init - Successfully authenticated as:', payload.preferred_username);
   }
 
   login(): Promise<void> {
@@ -91,12 +82,11 @@ export class AuthService {
       `${this.getEnv('keycloakUrl', 'http://localhost:8080').replace(/\/$/, '')}/realms/${this.getEnv('keycloakRealm', 'registro-elettronico')}/protocol/openid-connect/auth`,
     );
     authorizeUrl.searchParams.set('client_id', this.getEnv('keycloakClientId', 'registro-frontend'));
-    authorizeUrl.searchParams.set('redirect_uri', this.document.location.origin);
+    authorizeUrl.searchParams.set('redirect_uri', this.document.location.origin + this.document.location.pathname);
     authorizeUrl.searchParams.set('response_type', 'token id_token');
     authorizeUrl.searchParams.set('scope', 'openid profile email');
     authorizeUrl.searchParams.set('prompt', 'login');
 
-    console.log('Login URL:', authorizeUrl.toString().substring(0, 200));
     this.document.location.href = authorizeUrl.toString();
     return Promise.resolve();
   }
@@ -106,31 +96,23 @@ export class AuthService {
       return Promise.resolve();
     }
 
-    // First, clear the local session completely
     this.clearSession();
-    
-    // Make sure localStorage is completely clear
     this.document.defaultView?.localStorage.clear();
-    
-    // Make sure sessionStorage is clear too
     this.document.defaultView?.sessionStorage.clear();
 
-    // Do the remote logout in the background
     const logoutUrl = new URL(
       `${this.getEnv('keycloakUrl', 'http://localhost:8080').replace(/\/$/, '')}/realms/${this.getEnv('keycloakRealm', 'registro-elettronico')}/protocol/openid-connect/logout`,
     );
-    
-    // Fire and forget the logout request
+
     try {
       await fetch(logoutUrl.toString(), { mode: 'no-cors' });
     } catch {
-      // Ignore errors from remote logout
+      // ignore
     }
-    
-    // Finally, reload the page completely to ensure clean state
-    await new Promise(resolve => setTimeout(resolve, 500));
-    this.document.location.href = this.document.location.origin;
-    
+
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    this.document.location.href = this.document.location.origin + this.document.location.pathname;
+
     return Promise.resolve();
   }
 
@@ -142,7 +124,23 @@ export class AuthService {
     return this.state().roles.includes(role);
   }
 
+  getPortalRole(): PortalRole {
+    const configuredRole = this.getEnv('portalRole', 'all').toLowerCase();
+    if (configuredRole === 'docente' || configuredRole === 'studente') {
+      return configuredRole;
+    }
+    return 'all';
+  }
+
   getHomeRoute(): string {
+    const portalRole = this.getPortalRole();
+    if (portalRole === 'docente') {
+      return '/docente';
+    }
+    if (portalRole === 'studente') {
+      return '/studente';
+    }
+
     if (this.hasRole('docente')) {
       return '/docente';
     }
@@ -161,7 +159,7 @@ export class AuthService {
     const params = new URLSearchParams(hash);
     const accessToken = params.get('access_token') ?? '';
     const idToken = params.get('id_token') ?? '';
-    
+
     if (accessToken || idToken) {
       this.idToken = idToken;
       this.document.defaultView?.history.replaceState({}, this.document.title, this.document.location.pathname);
@@ -187,11 +185,10 @@ export class AuthService {
     this.state.set({ authenticated: false, initialized: true, username: '', fullName: '', roles: [] });
   }
 
-  private generateNonce(): string {
-    return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-  }
-
-  private getEnv(key: 'keycloakUrl' | 'keycloakRealm' | 'keycloakClientId', fallback: string): string {
+  private getEnv(
+    key: 'keycloakUrl' | 'keycloakRealm' | 'keycloakClientId' | 'portalRole',
+    fallback: string,
+  ): string {
     const config = (globalThis as { __APP_CONFIG__?: Record<string, string> }).__APP_CONFIG__;
     return config?.[key] || fallback;
   }

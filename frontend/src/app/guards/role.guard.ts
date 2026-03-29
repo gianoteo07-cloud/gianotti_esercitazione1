@@ -14,6 +14,11 @@ export const roleGuard = (role: UserRole): CanActivateFn => {
       return false;
     }
 
+    const portalRole = authService.getPortalRole();
+    if (portalRole !== 'all' && portalRole !== role) {
+      return router.createUrlTree(['/accesso-negato']);
+    }
+
     if (!authService.hasRole(role)) {
       return router.createUrlTree(['/accesso-negato']);
     }
